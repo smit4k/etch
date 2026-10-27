@@ -69,7 +69,7 @@ header p { margin: .25rem 0 0; color: var(--color-muted); }
 }
 
 .workspace section { min-width: 0; }
-.panel-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .75rem; }
+.panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .75rem; }
 button, select, input, textarea { font: inherit; }
 button { border-radius: 0rem; }
 button, select, input[type="range"] { cursor: pointer; }
@@ -146,6 +146,8 @@ select {
 }
 
 select:hover { border-color: var(--color-muted); }
+
+#resolution { width: auto; min-height: 1.8rem; margin: 0; padding-block: .3rem; font-size: .75rem; }
 
 @supports (appearance: base-select) {
     select, select::picker(select) { appearance: base-select; }

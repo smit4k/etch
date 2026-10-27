@@ -16,6 +16,7 @@ export default function Editor() {
   const [background, setBackground] = useState("dark");
   const [padding, setPadding] = useState(8);
   const [format, setFormat] = useState("png");
+  const [resolution, setResolution] = useState(EXPORT_SIZE);
   const [rendered, setRendered] = useState(null);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -55,19 +56,19 @@ export default function Editor() {
     setExporting(true);
     setFeedback(`Creating your ${label}…`);
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = EXPORT_SIZE;
+    canvas.width = canvas.height = resolution;
     try {
       renderArt(canvas, options);
       const blob = await encodeImage(canvas, format);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `ascii-art-${EXPORT_SIZE}.${format}`;
+      link.download = `ascii-art-${resolution}.${format}`;
       document.body.append(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setFeedback(`Your 4096 × 4096 ${label} is ready.`);
+      setFeedback(`Your ${resolution} × ${resolution} ${label} is ready.`);
     } catch (failure) {
       setFeedback(failure.message);
     } finally {
@@ -155,11 +156,27 @@ export default function Editor() {
       </section>
 
       <section className="result" aria-labelledby="preview-heading">
-        <div className="panel-heading"><h2 id="preview-heading">Preview</h2></div>
+        <div className="panel-heading">
+          <h2 id="preview-heading">Preview</h2>
+          <select
+            id="resolution"
+            value={resolution}
+            onChange={event => {
+              setResolution(Number(event.target.value));
+              setFeedback("");
+            }}
+            aria-label="Export resolution"
+            title="Export resolution"
+          >
+            {[512, 1024, 2048, 4096].map(size => (
+              <option key={size} value={size}>{size} × {size}</option>
+            ))}
+          </select>
+        </div>
         <div className="canvas-wrap">
           <canvas ref={preview} id="preview" width="1024" height="1024" role="img" aria-label="Live square preview of your ASCII art" />
         </div>
-        <div className="panel-note"><span id="export-info">4096 × 4096 · {label}</span></div>
+        <div className="panel-note"><span id="export-info">{resolution} × {resolution} · {label}</span></div>
         <div className="download-controls">
           <button id="download" type="button" onClick={download} disabled={!ready || exporting}>
             {exporting ? "Creating image…" : `Download ${label}`}

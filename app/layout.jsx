@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "ASCII to image",
-  description: "Turn ASCII art into a square 4096 × 4096 PNG, JPEG, or WebP. Choose a font, paste your characters, and download. Everything stays in your browser.",
+  description: "Turn ASCII art into a square PNG, JPEG, or WebP. Choose a font and resolution, paste your characters, and download. Everything stays in your browser.",
 };
 
 export default function RootLayout({ children }) {
