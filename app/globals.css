@@ -149,7 +149,7 @@ select {
 select:hover { border-color: var(--color-muted); }
 
 #resolution { width: auto; min-height: 1.8rem; margin: 0; padding-block: .3rem; font-size: .75rem; }
-.shape-control { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; font-size: .9rem; }
+.shape-control { display: flex; align-items: center; gap: 1rem; margin: 1rem 0; font-size: .9rem; }
 #shape { flex: 1; min-width: 0; margin: 0; }
 
 @supports (appearance: base-select) {

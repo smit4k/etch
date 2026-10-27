@@ -187,7 +187,6 @@ export default function Editor() {
         <div className="canvas-wrap" style={{ aspectRatio: `${previewWidth} / ${previewHeight}` }}>
           <canvas ref={preview} id="preview" width={previewWidth} height={previewHeight} role="img" aria-label="Live preview of your ASCII art" />
         </div>
-        <div className="panel-note"><span id="export-info">{width} × {height} · {label}</span></div>
         <label className="shape-control" htmlFor="shape">Canvas
           <select id="shape" value={shape} onChange={event => setShape(event.target.value)}>
             {Object.entries(shapes).map(([value, preset]) => (
