@@ -44,17 +44,17 @@ export function renderArt(canvas, { text, font, background, padding }) {
     context.font = `${FONT_SIZE}px ${font}`;
     context.fontKerning = "none";
     const layout = measureArt(text, line => context.measureText(line));
-    const size = canvas.width;
-    const scale = size * (1 - padding / 50) / Math.max(layout.width, layout.height);
+    const { width, height } = canvas;
+    const scale = Math.min(width / layout.width, height / layout.height) * (1 - padding / 50);
 
-    context.clearRect(0, 0, size, size);
+    context.clearRect(0, 0, width, height);
     if (background !== "transparent") {
         context.fillStyle = background === "light" ? "#ffffff" : "#000000";
-        context.fillRect(0, 0, size, size);
+        context.fillRect(0, 0, width, height);
     }
     context.save();
     context.fillStyle = background === "dark" ? "#e0e0e0" : "#000000";
-    context.translate((size - layout.width * scale) / 2, (size - layout.height * scale) / 2);
+    context.translate((width - layout.width * scale) / 2, (height - layout.height * scale) / 2);
     context.scale(scale, scale);
     context.translate(-layout.left, -layout.top);
     layout.lines.forEach((line, index) => context.fillText(line, 0, layout.baseline + index * FONT_SIZE));

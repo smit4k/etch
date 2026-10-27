@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EXPORT_SIZE, encodeImage, measureArt } from "./render.mjs";
+import { EXPORT_SIZE, encodeImage, measureArt, renderArt } from "./render.mjs";
 
 const measure = text => ({
     width: text.length * 60,
@@ -33,6 +33,37 @@ test("includes glyph overhang so zero margin does not clip it", () => {
 test("rejects empty or oversized input", () => {
     assert.throws(() => measureArt(" \n\t", measure), /Paste some ASCII art/);
     assert.throws(() => measureArt("x".repeat(50001), measure), /50,000 characters/);
+});
+
+test("centers art without stretching or clipping on square and rectangular canvases", () => {
+    for (const [width, height] of [[512, 512], [1200, 400], [680, 240], [960, 540], [240, 680]]) {
+        for (const padding of [0, 8, 24]) {
+            for (const background of ["dark", "light", "transparent"]) {
+                const translations = [];
+                const fills = [];
+                let cleared, scale;
+                const context = {
+                    measureText: measure,
+                    clearRect: (...rect) => { cleared = rect; },
+                    fillRect: (...rect) => { fills.push(rect); },
+                    translate: (...offset) => { translations.push(offset); },
+                    scale: (...factors) => { scale = factors; },
+                    save() {}, restore() {}, fillText() {},
+                };
+                const canvas = { width, height, getContext: () => context };
+                const layout = renderArt(canvas, { text: "ASCII ART\n  banner", font: "monospace", background, padding });
+                assert.deepEqual(cleared, [0, 0, width, height]);
+                assert.deepEqual(fills, background === "transparent" ? [] : [[0, 0, width, height]]);
+                assert.equal(scale[0], scale[1], "characters keep their proportions");
+                const [x, y] = translations[0];
+                assert.ok(Math.abs(x + layout.width * scale[0] / 2 - width / 2) < 1e-8);
+                assert.ok(Math.abs(y + layout.height * scale[1] / 2 - height / 2) < 1e-8);
+                assert.ok(x >= width * padding / 100 - 1e-8, "horizontal margin is preserved");
+                assert.ok(y >= height * padding / 100 - 1e-8, "vertical margin is preserved");
+                assert.ok(Math.abs(Math.min(x / width, y / height) - padding / 100) < 1e-8, "art fills the available space");
+            }
+        }
+    }
 });
 
 test("exports the requested format at maximum quality", async () => {

@@ -10,22 +10,32 @@ const fonts = {
   space: '"Space Mono", monospace',
 };
 
+const shapes = {
+  square: { label: "Square · 1:1", sizes: [512, 1024, 2048, EXPORT_SIZE].map(size => [size, size]) },
+  banner: { label: "Banner · 3:1", sizes: [[600, 200], [1200, 400], [2400, 800], [3840, 1280]] },
+  profile: { label: "Discord profile · 17:6", sizes: [[680, 240], [1360, 480], [2720, 960], [4080, 1440]] },
+  server: { label: "Discord server · 16:9", sizes: [[960, 540], [1920, 1080], [2880, 1620], [3840, 2160]] },
+};
+
 export default function Editor() {
   const [text, setText] = useState(flower);
   const [font, setFont] = useState("courier");
   const [background, setBackground] = useState("dark");
   const [padding, setPadding] = useState(8);
   const [format, setFormat] = useState("png");
-  const [resolution, setResolution] = useState(EXPORT_SIZE);
+  const [shape, setShape] = useState("square");
+  const [sizeIndex, setSizeIndex] = useState(3);
   const [rendered, setRendered] = useState(null);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [exporting, setExporting] = useState(false);
   const preview = useRef(null);
   const exportLock = useRef(false);
+  const [width, height] = shapes[shape].sizes[sizeIndex];
+  const [previewWidth, previewHeight] = shapes[shape].sizes[1];
   const options = { text, font: fonts[font], background, padding };
   const renderKey = JSON.stringify(options);
-  const ready = rendered?.key === renderKey && !error;
+  const ready = rendered?.key === renderKey && rendered?.shape === shape && !error;
   const label = format.toUpperCase();
 
   useEffect(() => {
@@ -38,17 +48,17 @@ export default function Editor() {
         await document.fonts.load(`100px ${selected.font}`);
         if (cancelled) return;
         const layout = renderArt(preview.current, selected);
-        setRendered({ key: renderKey, columns: Math.max(...layout.lines.map(line => line.length)), lines: layout.lines.length });
+        setRendered({ key: renderKey, shape, columns: Math.max(...layout.lines.map(line => line.length)), lines: layout.lines.length });
       } catch (failure) {
         if (cancelled) return;
-        preview.current.getContext("2d")?.clearRect(0, 0, 1024, 1024);
+        preview.current.getContext("2d")?.clearRect(0, 0, preview.current.width, preview.current.height);
         setRendered(null);
         setError(failure.message);
       }
     }
     update();
     return () => { cancelled = true; };
-  }, [renderKey]);
+  }, [renderKey, shape]);
 
   async function download() {
     if (!ready || exportLock.current) return;
@@ -56,19 +66,20 @@ export default function Editor() {
     setExporting(true);
     setFeedback(`Creating your ${label}…`);
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = resolution;
+    canvas.width = width;
+    canvas.height = height;
     try {
       renderArt(canvas, options);
       const blob = await encodeImage(canvas, format);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `ascii-art-${resolution}.${format}`;
+      link.download = `ascii-art-${width}x${height}.${format}`;
       document.body.append(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setFeedback(`Your ${resolution} × ${resolution} ${label} is ready.`);
+      setFeedback(`Your ${width} × ${height} ${label} is ready.`);
     } catch (failure) {
       setFeedback(failure.message);
     } finally {
@@ -160,23 +171,30 @@ export default function Editor() {
           <h2 id="preview-heading">Preview</h2>
           <select
             id="resolution"
-            value={resolution}
+            value={sizeIndex}
             onChange={event => {
-              setResolution(Number(event.target.value));
+              setSizeIndex(Number(event.target.value));
               setFeedback("");
             }}
             aria-label="Export resolution"
             title="Export resolution"
           >
-            {[512, 1024, 2048, 4096].map(size => (
-              <option key={size} value={size}>{size} × {size}</option>
+            {shapes[shape].sizes.map(([width, height], index) => (
+              <option key={index} value={index}>{width} × {height}</option>
             ))}
           </select>
         </div>
-        <div className="canvas-wrap">
-          <canvas ref={preview} id="preview" width="1024" height="1024" role="img" aria-label="Live square preview of your ASCII art" />
+        <div className="canvas-wrap" style={{ aspectRatio: `${previewWidth} / ${previewHeight}` }}>
+          <canvas ref={preview} id="preview" width={previewWidth} height={previewHeight} role="img" aria-label="Live preview of your ASCII art" />
         </div>
-        <div className="panel-note"><span id="export-info">{resolution} × {resolution} · {label}</span></div>
+        <div className="panel-note"><span id="export-info">{width} × {height} · {label}</span></div>
+        <label className="shape-control" htmlFor="shape">Canvas
+          <select id="shape" value={shape} onChange={event => setShape(event.target.value)}>
+            {Object.entries(shapes).map(([value, preset]) => (
+              <option key={value} value={value}>{preset.label}</option>
+            ))}
+          </select>
+        </label>
         <div className="download-controls">
           <button id="download" type="button" onClick={download} disabled={!ready || exporting}>
             {exporting ? "Creating image…" : `Download ${label}`}

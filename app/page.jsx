@@ -8,7 +8,7 @@ export default function Home() {
       <main>
         <header>
           <h1>ASCII to image</h1>
-          <p>Render ASCII art as a square, high-resolution image.</p>
+          <p>Render ASCII art as an image or a banner.</p>
         </header>
         <Editor />
         <footer>
