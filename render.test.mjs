@@ -36,7 +36,7 @@ test("rejects empty or oversized input", () => {
 });
 
 test("centers art without stretching or clipping on square and rectangular canvases", () => {
-    for (const [width, height] of [[512, 512], [1200, 400], [680, 240], [960, 540], [240, 680]]) {
+    for (const [width, height] of [[512, 512], [1200, 400], [680, 240], [960, 540], [240, 680], [720, 1280], [1080, 1920], [1440, 2560], [2160, 3840], [1280, 720], [1920, 1080], [2560, 1440], [3840, 2160]]) {
         for (const padding of [0, 8, 24]) {
             for (const background of ["dark", "light", "transparent"]) {
                 const translations = [];

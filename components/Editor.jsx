@@ -13,6 +13,8 @@ const fonts = {
 const shapes = {
   square: { label: "Square · 1:1", sizes: [512, 1024, 2048, EXPORT_SIZE].map(size => [size, size]) },
   banner: { label: "Banner · 3:1", sizes: [[600, 200], [1200, 400], [2400, 800], [3840, 1280]] },
+  phone: { label: "Phone wallpaper · 9:16", sizes: [[720, 1280], [1080, 1920], [1440, 2560], [2160, 3840]] },
+  desktop: { label: "Desktop wallpaper · 16:9", sizes: [[1280, 720], [1920, 1080], [2560, 1440], [3840, 2160]] },
   profile: { label: "Discord profile · 17:6", sizes: [[680, 240], [1360, 480], [2720, 960], [4080, 1440]] },
   server: { label: "Discord server · 16:9", sizes: [[960, 540], [1920, 1080], [2880, 1620], [3840, 2160]] },
 };
